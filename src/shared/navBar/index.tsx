@@ -4,6 +4,7 @@ import { liquidityPath, removeLiquidityPath, rootPath } from '../../logic/paths'
 import { loginReducer, logoutReducer } from '../../redux/action/walletAction'
 import { AppDispatch, RootState } from '../../redux/store'
 import Button from '../button'
+import { CustomText, Spacer } from '../shared'
 import ThemeToggle from '../themeToggle'
 import { NavBarContainerStyled, NavItem } from './style'
 
@@ -59,7 +60,16 @@ const NavBar = () => {
       </div>
       <div className="grid-item">
         {account ? (
-          <Button onClick={() => dispatch(logoutReducer())}>Logout</Button>
+          <>
+            <Button
+              onClick={() => navigator.clipboard.writeText(account)}
+              style={{ backgroundColor: '#b3c3e5', color: '#000' }}
+            >
+              {`${account.substring(0, 5)}...${account.substring(account.length - 5, account.length)}`}
+            </Button>
+            <Spacer marginLeft="2rem" />
+            <Button onClick={() => dispatch(logoutReducer())}>Logout</Button>
+          </>
         ) : (
           <Button onClick={() => dispatch(loginReducer())}>Connect Wallet</Button>
         )}

@@ -24,6 +24,9 @@ const walletSlice = createSlice({
     })
   },
   reducers: {
+    changeAccount: (state, action) => {
+      state.account = action.payload
+    },
     logoutReducer: (state) => {
       localStorage.removeItem('walletLogin')
       state.account = null
@@ -31,6 +34,6 @@ const walletSlice = createSlice({
   },
 })
 
-export const { logoutReducer } = walletSlice.actions
+export const { logoutReducer, changeAccount } = walletSlice.actions
 
 export default walletSlice.reducer

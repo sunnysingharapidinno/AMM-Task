@@ -7,7 +7,7 @@ import { useContext, useEffect, useState } from 'react'
 import { ThemeContext } from '../../context/themeContext'
 import { AppDispatch } from '../../redux/store'
 import { useDispatch } from 'react-redux'
-import { loginReducer, logoutReducer } from '../../redux/action/walletAction'
+import { changeAccount, loginReducer, logoutReducer } from '../../redux/action/walletAction'
 
 export const App = () => {
   const [currentTheme, setCurrentTheme] = useState({ ...getTheme(Themes.LIGHT), selected: Themes.LIGHT })
@@ -25,6 +25,12 @@ export const App = () => {
     const login = localStorage.getItem('walletLogin')
     if (login === 'true') {
       dispatch(loginReducer())
+
+      if (window?.ethereum) {
+        window.ethereum.on('accountsChanged', (account: string[]) => {
+          dispatch(changeAccount(account[0]))
+        })
+      }
     } else {
       dispatch(logoutReducer())
     }

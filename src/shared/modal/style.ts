@@ -52,8 +52,8 @@ interface ModalContentInterface {
 const ModalContentOpenAnimation = (props?: ModalInitialPositionInterface) => keyframes`
   0%{
     /* transform: translateX(${props?.x}px) translateY(${Number(props?.y)}px);             */
-    transform: translateY(100vh);
-    scale: 0.5;
+    transform: translateY(200vh);
+    scale: 0;
   }
   100%{
     scale: 1;      
@@ -68,8 +68,8 @@ const ModalContentCloseAnimation = (props?: ModalInitialPositionInterface) => ke
   }
   100%{
     /* transform: translateX(${props?.x}px) translateY(${Number(props?.y)}px);         */
-    transform: translateY(100vh);
-    scale: 0.5;
+    transform: translateY(200vh);
+    scale: 0;
   }
 `
 
@@ -80,7 +80,7 @@ export const ModalContent = styled.div<ModalContentInterface>`
   position: absolute;
   animation: ${(props) =>
       props.show ? ModalContentOpenAnimation(props.currentPosition) : ModalContentCloseAnimation(props.currentPosition)}
-    0.3s linear;
+    0.3s cubic-bezier(0.95, 0.83, 0.16, 0.24);
   width: 80%;
   animation-fill-mode: forwards;
   @media (min-width: 1200px) {

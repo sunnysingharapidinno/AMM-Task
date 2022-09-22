@@ -14,12 +14,7 @@ const Button: React.FC<ButtonInterface> = (props) => {
     return <CircularButtonStyled {...props}>{children}</CircularButtonStyled>
   }
 
-  return (
-    <NormalButtonStyled {...props}>
-      {/* {!loading && <CircularLoad size={0.5} />} */}
-      {children}
-    </NormalButtonStyled>
-  )
+  return <NormalButtonStyled {...props}>{children}</NormalButtonStyled>
 }
 
 export default Button

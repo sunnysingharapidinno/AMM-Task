@@ -17,8 +17,8 @@ import { swap, SwapMethods } from '../../logic/swap/transaction'
 
 export const tokensList = [BNB, REST, BUST]
 const SwapPage: React.FC = () => {
-  const [input0, setInput0] = useState<string | undefined>('')
-  const [input1, setInput1] = useState<string | undefined>('')
+  const [input0, setInput0] = useState<string | number>('')
+  const [input1, setInput1] = useState<string | number>('')
   const [token0, setToken0] = useState<string>(tokensList[0])
   const [token1, setToken1] = useState<string>(tokensList[1])
   const [token0Balance, setToken0Balance] = useState<string | number>(0)
@@ -36,7 +36,7 @@ const SwapPage: React.FC = () => {
 
   const { account } = useSelector((state: RootState) => state.wallet)
 
-  const _handleInput0OnChange = async (value: string | undefined) => {
+  const _handleInput0OnChange = async (value: string | number) => {
     setInput0(value)
     if (value && Number(value) > 0) {
       const amount = await getAmountsOut(value?.toString(), token0, token1)
@@ -52,7 +52,7 @@ const SwapPage: React.FC = () => {
     }
   }
 
-  const _handleInput1OnChange = async (value: string | undefined) => {
+  const _handleInput1OnChange = async (value: string | number) => {
     setInput1(value)
     if (value && Number(value) > 0) {
       const amount = await getAmountsOut(value?.toString(), token1, token0)
@@ -233,6 +233,34 @@ const SwapPage: React.FC = () => {
     }
   }
 
+  const _handleInput0MaxClick = async () => {
+    if (account) {
+      if (token0 === BNB || token0 === WBNB) {
+        await _handleInput0OnChange(Number(token0Balance) - 0.01)
+      } else {
+        await _handleInput0OnChange(token0Balance)
+      }
+    }
+  }
+
+  const _handleInput1MaxClick = async () => {
+    if (account) {
+      if (token1 === BNB || token1 === WBNB) {
+        await _handleInput1OnChange(Number(token1Balance) - 0.01)
+      } else {
+        await _handleInput1OnChange(token1Balance)
+      }
+    }
+  }
+
+  const _handleSwapButtonDisabled = (): boolean => {
+    if (!account || Number(token0Balance) < Number(input0) || !input0 || !input1) {
+      return true
+    } else {
+      return false
+    }
+  }
+
   useEffect(() => {
     if (notifyMessage && notifyMessage?.autoClose) {
       setTimeout(() => {
@@ -297,10 +325,12 @@ const SwapPage: React.FC = () => {
         <Spacer margin="2rem" />
         <InputContainer rotate={switchInput}>
           <AmmInput
+            placeholder="0.00"
             balance={token0Balance}
             className="input0"
             value={input0}
             selctedToken={token0}
+            onMaxClick={_handleInput0MaxClick}
             onChange={_handleInput0OnChange}
             tokenList={tokensList.filter((token) => token !== token1)}
             onTokenChange={(token) => {
@@ -313,6 +343,7 @@ const SwapPage: React.FC = () => {
             </RotateContainer>
           </Center>
           <AmmInput
+            placeholder="0.00"
             balance={token1Balance}
             tokenList={tokensList.filter((token) => token !== token0)}
             className="input1"
@@ -321,11 +352,13 @@ const SwapPage: React.FC = () => {
             onTokenChange={(token) => {
               setToken1(token)
             }}
+            onMaxClick={_handleInput1MaxClick}
             onChange={_handleInput1OnChange}
           />
         </InputContainer>
         <Spacer margin="1rem" />
         <Expander
+          open={true}
           header={`1 ${switchInput ? token1 : token0} = ${Number(token0PerToken1).toFixed(2)} ${
             switchInput ? token0 : token1
           }`}
@@ -344,7 +377,7 @@ const SwapPage: React.FC = () => {
               Price Impact
             </CustomText>
             <CustomText size="0.9rem" weight="700">
-              20
+              <i>TODO</i>
             </CustomText>
           </Flex>
           <Spacer marginTop="1rem" />
@@ -358,7 +391,7 @@ const SwapPage: React.FC = () => {
               </Button>
             </Flex>
           ) : (
-            <Button disabled={!account} onClick={_handleSwap}>
+            <Button disabled={_handleSwapButtonDisabled()} onClick={_handleSwap}>
               Swap
             </Button>
           )}
@@ -372,7 +405,14 @@ const SwapPage: React.FC = () => {
         }}
         heading={notifyMessage?.name}
       >
-        <CustomText variants="h6">{notifyMessage?.message}</CustomText>
+        <CustomText
+          variants="normal"
+          style={{
+            wordWrap: 'break-word',
+          }}
+        >
+          {notifyMessage?.message}
+        </CustomText>
       </Modal>
     </Center>
   )

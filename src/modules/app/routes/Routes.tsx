@@ -2,7 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 
 import { liquidityPath, removeLiquidityPath, rootPath } from '../../../logic/paths'
 import PageContianer from '../../../shared/pageContainer'
-import Liquidity from '../../liquidity'
+import AddLiquidityPage from '../../addLiquidity'
 import PageNotFound from '../../pageNotFound'
 import RemoveLiquidityPage from '../../removeLiquidity'
 import SwapPage from '../../swap'
@@ -24,7 +24,7 @@ export const routes: RouteDefinition[] = [
   },
   {
     path: liquidityPath,
-    element: Liquidity,
+    element: AddLiquidityPage,
     protected: false,
     title: 'Remove Liquidity',
     pathType: 0,

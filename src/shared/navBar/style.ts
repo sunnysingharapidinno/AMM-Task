@@ -8,6 +8,11 @@ export const NavBarContainerStyled = styled.div`
   padding: 0rem 1rem;
   background-color: ${(props) => props.theme.primary};
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  .logo {
+    filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(180deg);
+    padding: 0.5rem;
+    cursor: pointer;
+  }
   .grid-item {
     display: flex;
     align-items: center;
@@ -41,10 +46,11 @@ interface NavItemInterface {
 export const NavItem = styled(NavLink)<NavItemInterface>`
   text-decoration: none;
   color: ${(props) => (props.activepath ? props.theme.text : props.theme.grey)};
-  background-color: ${(props) => props.activepath && props.theme.gray};
-  width: ${Number(SIZES.XXS) / 2}rem;
+  /* background-color: ${(props) => props.activepath && props.theme.gray}; */
+  background-color: ${(props) => props.activepath && '#b3c3e5'};
+  /* width: ${Number(SIZES.XXS) / 2}rem; */
   text-align: center;
-  padding: 0.8rem 0rem;
+  padding: 0.8rem 1rem;
   margin: ${Number(SIZES.XS)}px;
   border-radius: ${Number(SIZES.XXS) / 2}px;
   font-size: ${Number(SIZES.XS)}px;

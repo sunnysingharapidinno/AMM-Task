@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AiOutlineSetting } from 'react-icons/ai'
 import { IoMdAdd } from 'react-icons/io'
 import { useSelector } from 'react-redux'
+import { BNB, WBNB } from '../../constants'
 import { getLiquidity, getPoolShare, getQuotePrice } from '../../logic/liquidity'
 import { supplyLiquidity } from '../../logic/liquidity/transaction'
 import { checkApproval, getBalance } from '../../logic/shared'
@@ -17,7 +18,7 @@ import { TransactionSettingsContainer } from '../swap/style'
 
 type Props = {}
 
-const RemoveLiquidityPage = (props: Props) => {
+const AddLiquidityPage = (props: Props) => {
   const [input0, setInput0] = useState<string | number>('')
   const [input1, setInput1] = useState<string | number>('')
   const [token0, setToken0] = useState<string>(tokensList[0])
@@ -199,6 +200,40 @@ const RemoveLiquidityPage = (props: Props) => {
     }
   }
 
+  const _handleInput0MaxClick = async () => {
+    if (account) {
+      if (token0 === BNB || token0 === WBNB) {
+        await _handleInput0OnChange(Number(token0Balance) - 0.01)
+      } else {
+        await _handleInput0OnChange(token0Balance)
+      }
+    }
+  }
+
+  const _handleInput1MaxClick = async () => {
+    if (account) {
+      if (token1 === BNB || token1 === WBNB) {
+        await _handleInput1OnChange(Number(token1Balance) - 0.01)
+      } else {
+        await _handleInput1OnChange(token1Balance)
+      }
+    }
+  }
+
+  const _handleSupplyButtonDisabled = (): boolean => {
+    if (
+      !account ||
+      Number(token0Balance) < Number(input0) ||
+      Number(token1Balance) < Number(input1) ||
+      !input0 ||
+      !input1
+    ) {
+      return true
+    } else {
+      return false
+    }
+  }
+
   useEffect(() => {
     _getTokenPerToken()
   }, [token0, token1])
@@ -208,16 +243,161 @@ const RemoveLiquidityPage = (props: Props) => {
       _checkApproval()
       _getBalance()
     }
-  }, [account, token0, token1])
+  }, [account, token0, token1, notifyMessage])
 
   return (
     <Center>
       <Spacer marginTop="3rem" />
-      <i>
-        <h1>Todo Remove Liquidity</h1>
-      </i>
+      <Card>
+        <Expander
+          header={() => (
+            <CustomText variants="h5" weight="700">
+              Add Liquidity
+            </CustomText>
+          )}
+          expanderIcon={<AiOutlineSetting className="icon" />}
+        >
+          <TransactionSettingsContainer>
+            <CustomText size="1.2rem" weight="700">
+              Transaction Settings
+            </CustomText>
+            <Spacer margin="0.5rem" />
+
+            <CustomText size="0.9rem" weight="700">
+              Slippage
+            </CustomText>
+            <div className="column">
+              <Button onClick={_handleAutoSlippageClick}>Auto</Button>
+              <TextBox fullWidth type="text" value={slippage} placeholder="Slippage" onChange={_handleSlippageInput} />
+            </div>
+            <CustomText size="0.9rem" weight="700">
+              Transaction Deadline
+            </CustomText>
+
+            <div className="column">
+              <Button onClick={() => setTrxDeadline('5')}>Auto</Button>
+              <TextBox
+                fullWidth
+                type="text"
+                placeholder="Transaction Deadline"
+                value={trxDeadline}
+                onChange={(e) => setTrxDeadline(e.target.value)}
+              />
+            </div>
+            <Spacer margin="2rem" />
+          </TransactionSettingsContainer>
+        </Expander>
+        <Spacer margin="2rem" />
+
+        <AmmInput
+          placeholder="0.00"
+          balance={token0Balance}
+          className="input0"
+          value={input0}
+          selctedToken={token0}
+          onMaxClick={_handleInput0MaxClick}
+          onChange={_handleInput0OnChange}
+          tokenList={tokensList.filter((token) => token !== token1)}
+          onTokenChange={(token) => {
+            setToken0(token)
+          }}
+        />
+        <Center>
+          <RotateContainer>
+            <IoMdAdd className="icon" />
+          </RotateContainer>
+        </Center>
+        <AmmInput
+          placeholder="0.00"
+          balance={token1Balance}
+          tokenList={tokensList.filter((token) => token !== token0)}
+          className="input1"
+          value={input1}
+          selctedToken={token1}
+          onTokenChange={(token) => {
+            setToken1(token)
+          }}
+          onMaxClick={_handleInput1MaxClick}
+          onChange={_handleInput1OnChange}
+        />
+        <Spacer margin="1rem" />
+
+        <Flex justifyContent="space-between">
+          <CustomText size="0.9rem" weight="700">
+            You receive
+          </CustomText>
+          <CustomText size="0.9rem" weight="700">
+            {Number(minReceived).toFixed(4)} {token0}-{token1} LP
+          </CustomText>
+        </Flex>
+
+        <Expander open={true} header={`Prices and pool share`}>
+          <Flex justifyContent="space-between">
+            <CustomText size="0.9rem" weight="700">
+              {token0} per {token1}
+            </CustomText>
+            <CustomText size="0.9rem" weight="700">
+              {Number(token0PerToken1).toFixed(4)}
+            </CustomText>
+          </Flex>
+          <Spacer marginTop="0.5rem" />
+          <Flex justifyContent="space-between">
+            <CustomText size="0.9rem" weight="700">
+              {token1} per {token0}
+            </CustomText>
+            <CustomText size="0.9rem" weight="700">
+              {Number(token1PerToken0).toFixed(4)}
+            </CustomText>
+          </Flex>
+          <Spacer marginTop="0.5rem" />
+          <Flex justifyContent="space-between">
+            <CustomText size="0.9rem" weight="700">
+              Pool Share
+            </CustomText>
+            <CustomText size="0.9rem" weight="700">
+              {Number(poolShare).toFixed(4)}%
+            </CustomText>
+          </Flex>
+          <Spacer marginTop="1rem" />
+        </Expander>
+
+        <Center>
+          {!(token0Approved && token1Approved) && account ? (
+            <Flex>
+              <Button disabled={!account || approvingToken0 || token0Approved} onClick={_handleToken0Approval}>
+                Approve {token0}
+              </Button>
+              <Spacer marginRight="1rem" />
+              <Button disabled={!account || approvingToken1 || token1Approved} onClick={_handleToken1Approval}>
+                Approve {token1}
+              </Button>
+            </Flex>
+          ) : (
+            <Button disabled={_handleSupplyButtonDisabled()} onClick={_handleSupplyLiquidity}>
+              Supply Liquidity
+            </Button>
+          )}
+        </Center>
+      </Card>
+
+      <Modal
+        show={!!notifyMessage}
+        toggleModal={() => {
+          setNotifyMessage(null)
+        }}
+        heading={notifyMessage?.name}
+      >
+        <CustomText
+          variants="normal"
+          style={{
+            wordWrap: 'break-word',
+          }}
+        >
+          {notifyMessage?.message}
+        </CustomText>
+      </Modal>
     </Center>
   )
 }
 
-export default RemoveLiquidityPage
+export default AddLiquidityPage

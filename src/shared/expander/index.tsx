@@ -7,21 +7,22 @@ interface ExpanderInterface {
   header?: (() => React.ReactNode) | string
   expanderIcon?: React.ReactNode
   children?: React.ReactNode
+  open?: boolean
 }
 
 const Expander = (props: ExpanderInterface) => {
-  const { header, children, expanderIcon } = props
-  const [openContent, setOpenContent] = useState<boolean>()
+  const { header, children, expanderIcon, open } = props
+  const [openContent, setOpenContent] = useState<boolean | null>(open ? open : null)
 
   return (
     <ExpanderContainer>
       <ExpanderHeader onClick={() => setOpenContent(!openContent)}>
         <div className="header">{typeof header === 'string' ? header : header && header()}</div>
-        <RotateContainer rotate={openContent}>
+        <RotateContainer rotate={Boolean(openContent)}>
           {expanderIcon ? expanderIcon : <HiOutlineChevronDown className="icon" />}
         </RotateContainer>
       </ExpanderHeader>
-      <ExpanderContent rotate={openContent}>
+      <ExpanderContent rotate={Boolean(openContent)}>
         <Spacer margin="0.5rem">{children}</Spacer>
       </ExpanderContent>
     </ExpanderContainer>

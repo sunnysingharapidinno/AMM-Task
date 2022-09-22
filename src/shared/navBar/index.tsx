@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { liquidityPath, removeLiquidityPath, rootPath } from '../../logic/paths'
 import { loginReducer, logoutReducer } from '../../redux/action/walletAction'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -18,19 +18,30 @@ const navigations: NavigationInterface[] = [
     path: rootPath,
   },
   {
-    name: 'Liquidity',
+    name: 'Add Liquidity',
+    path: liquidityPath,
+  },
+  {
+    name: 'Remove Liquidity',
     path: removeLiquidityPath,
   },
 ]
 
+const rapidInnovationLogoURL =
+  'https://uploads-ssl.webflow.com/60c92ce167b91f55c48259ca/60e883fa2ffc2286619f0430_RapidInnovationsLogo.svg'
+
 const NavBar = () => {
   const { pathname } = useLocation()
+  const navigate = useNavigate()
+
   const { account } = useSelector((state: RootState) => state.wallet)
   const dispatch = useDispatch<AppDispatch>()
 
   return (
     <NavBarContainerStyled>
-      <div className="grid-item">Logo</div>
+      <div className="grid-item">
+        <img onClick={() => navigate(rootPath)} src={rapidInnovationLogoURL} alt="Rapid Innovation" className="logo" />
+      </div>
       <div className="grid-item">
         {navigations.map((item, index) => (
           <NavItem
@@ -53,7 +64,7 @@ const NavBar = () => {
           <Button onClick={() => dispatch(loginReducer())}>Connect Wallet</Button>
         )}
 
-        <ThemeToggle />
+        {/* <ThemeToggle /> */}
       </div>
     </NavBarContainerStyled>
   )

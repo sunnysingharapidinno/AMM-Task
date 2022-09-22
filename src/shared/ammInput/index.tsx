@@ -17,16 +17,18 @@ interface AMMInputInterface {
   tokenList?: string[]
   selctedToken?: string
   balance?: string | number
+  placeholder?: string
 }
 
 const AmmInput = (props: AMMInputInterface) => {
-  const { onMaxClick, value, onChange, className, onTokenChange, tokenList, selctedToken, balance } = props
+  const { onMaxClick, value, onChange, className, onTokenChange, tokenList, selctedToken, balance, placeholder } = props
   const { account } = useSelector((state: RootState) => state.wallet)
   const [showModal, setShowModal] = useState(false)
 
   return (
     <AMMInputContainer className={className}>
       <TextBox
+        placeholder={placeholder}
         fullWidth
         type="text"
         value={value}

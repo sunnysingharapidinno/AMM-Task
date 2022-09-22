@@ -1,3 +1,4 @@
+import { triggerAsyncId } from 'async_hooks'
 import { BNB, ERC20, ROUTER } from '../../constants'
 import { BSC_TESTNET_ADDRESS } from '../../constants/bsc-testnet/contract'
 import { getContract, getContractByAddress } from '../contract'
@@ -46,6 +47,28 @@ export const getReserves = async (abi: any, address: string) => {
     const instance = getContractByAddress(abi, address)
     const reserves = await instance.methods.getReserves().call()
     return reserves
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getTotalSupply = async (abi: any, address: string) => {
+  try {
+    const instance = getContractByAddress(abi, address)
+    const totalSupply = await instance.methods.totalSupply().call()
+
+    return totalSupply
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getToken0 = async (abi: any, address: string) => {
+  try {
+    const instance = getContractByAddress(abi, address)
+    const token0 = await instance.methods.token0().call()
+
+    return token0
   } catch (error) {
     throw error
   }

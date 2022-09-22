@@ -10,7 +10,7 @@ import { AMMInputContainer, BalanceContainer, TokenContainer } from './style'
 
 interface AMMInputInterface {
   onMaxClick?: React.MouseEventHandler<HTMLButtonElement> | undefined
-  onChange?: (value: string | undefined) => void
+  onChange?: (value: string | number) => void
   onTokenChange?: (token: string) => void
   value?: number | string
   className?: string

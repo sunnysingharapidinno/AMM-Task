@@ -3,7 +3,7 @@ import { AiOutlineSetting } from 'react-icons/ai'
 import { IoMdAdd } from 'react-icons/io'
 import { useSelector } from 'react-redux'
 import { BUST, REST, WBNB } from '../../constants'
-import { getPairAddress, getQuotePrice } from '../../logic/liquidity'
+import { getLiquidity, getPairAddress, getPoolShare, getQuotePrice } from '../../logic/liquidity'
 import { supplyLiquidity } from '../../logic/liquidity/transaction'
 import { checkApproval, getBalance } from '../../logic/shared'
 import { approveToken } from '../../logic/shared/transactions'
@@ -20,43 +20,57 @@ import { TransactionSettingsContainer } from '../swap/style'
 type Props = {}
 
 const RemoveLiquidityPage = (props: Props) => {
-  const [input0, setInput0] = useState<string | undefined>('')
-  const [input1, setInput1] = useState<string | undefined>('')
+  const [input0, setInput0] = useState<string | number>('')
+  const [input1, setInput1] = useState<string | number>('')
   const [token0, setToken0] = useState<string>(tokensList[0])
   const [token1, setToken1] = useState<string>(tokensList[1])
   const [token0Balance, setToken0Balance] = useState<string | number>(0)
   const [token1Balance, setToken1Balance] = useState<string | number>(0)
   const [token0Approved, setToken0Approved] = useState(false)
   const [token1Approved, setToken1Approved] = useState(false)
-  const [slippage, setSlippage] = useState<string | number | undefined>(0.5)
-  const [trxDeadline, setTrxDeadline] = useState<string | number | undefined>(15)
+  const [slippage, setSlippage] = useState<string | number>(0.5)
+  const [trxDeadline, setTrxDeadline] = useState<string | number>(15)
   const [token0PerToken1, setToken0PerToken1] = useState<string | number>(0)
   const [token1PerToken0, setToken1PerToken0] = useState<string | number>(0)
   const [approvingToken0, setApprovingToken0] = useState(false)
   const [approvingToken1, setApprovingToken1] = useState(false)
   const [minReceived, setMinReceived] = useState<number | string>(0)
+  const [poolShare, setPoolShare] = useState<number | string>(0)
 
   const [notifyMessage, setNotifyMessage] = useState<{ name: string; message: string; autoClose: boolean } | null>(null)
 
   const { account } = useSelector((state: RootState) => state.wallet)
 
-  const _handleInput0OnChange = async (value: string | undefined) => {
+  const _handleInput0OnChange = async (value: string | number) => {
     setInput0(value)
 
     if (value && Number(value) > 0) {
       const amount = await getQuotePrice(token0, token1, value)
       setInput1(amount)
+      const share = await getPoolShare(token0, token1, value, amount)
+      setPoolShare(share)
+      const liquidity = await getLiquidity(token0, token1, value, amount)
+      setMinReceived(liquidity)
     } else {
       setInput1('')
+      setPoolShare(0)
+      setMinReceived(0)
     }
   }
-  const _handleInput1OnChange = async (value: string | undefined) => {
+
+  const _handleInput1OnChange = async (value: string | number) => {
     setInput1(value)
     if (value && Number(value) > 0) {
       const amount = await getQuotePrice(token0, token1, value, true)
       setInput0(amount)
+      const share = await getPoolShare(token0, token1, amount, value)
+      setPoolShare(share)
+      const liquidity = await getLiquidity(token0, token1, amount, value)
+      setMinReceived(liquidity)
     } else {
       setInput0('')
+      setPoolShare(0)
+      setMinReceived(0)
     }
   }
   const _handleAutoSlippageClick = () => {
@@ -91,6 +105,7 @@ const RemoveLiquidityPage = (props: Props) => {
       }
     }
   }
+
   const _handleToken1Approval = async () => {
     if (account) {
       try {
@@ -115,6 +130,7 @@ const RemoveLiquidityPage = (props: Props) => {
       }
     }
   }
+
   const _handleSupplyLiquidity = async () => {
     try {
       setNotifyMessage({
@@ -122,15 +138,18 @@ const RemoveLiquidityPage = (props: Props) => {
         name: 'Transaction in progress',
         autoClose: false,
       })
-      const trx = await supplyLiquidity()
 
-      console.log(trx)
+      if (account) {
+        const trx = await supplyLiquidity(token0, token1, input0, input1, slippage, trxDeadline, account)
 
-      // setNotifyMessage({
-      //   message: `Transaction hash ${trx.transactionHash}`,
-      //   name: 'Transaction success',
-      //   autoClose: false,
-      // })
+        console.log(trx)
+
+        setNotifyMessage({
+          message: `Transaction hash ${trx.transactionHash}`,
+          name: 'Transaction success',
+          autoClose: false,
+        })
+      }
     } catch (error) {
       setNotifyMessage({
         /* @ts-ignore */
@@ -183,21 +202,14 @@ const RemoveLiquidityPage = (props: Props) => {
 
   useEffect(() => {
     _getTokenPerToken()
-  }, [])
+  }, [token0, token1])
 
   useEffect(() => {
     if (account) {
       _checkApproval()
       _getBalance()
     }
-  }, [account])
-
-  // useEffect(() => {
-  //   ;(async () => {
-  //     const res = await getQuotePrice(WBNB, REST, '1', true)
-  //     console.log(res)
-  //   })()
-  // }, [])
+  }, [account, token0, token1])
 
   return (
     <Center>
@@ -270,8 +282,17 @@ const RemoveLiquidityPage = (props: Props) => {
           }}
           onChange={_handleInput1OnChange}
         />
-
         <Spacer margin="1rem" />
+
+        <Flex justifyContent="space-between">
+          <CustomText size="0.9rem" weight="700">
+            You receive
+          </CustomText>
+          <CustomText size="0.9rem" weight="700">
+            {Number(minReceived).toFixed(4)} {token0}-{token1} LP
+          </CustomText>
+        </Flex>
+
         <Expander header={`Prices and pool share`}>
           <Flex justifyContent="space-between">
             <CustomText size="0.9rem" weight="700">
@@ -296,7 +317,7 @@ const RemoveLiquidityPage = (props: Props) => {
               Pool Share
             </CustomText>
             <CustomText size="0.9rem" weight="700">
-              0.1%
+              {Number(poolShare).toFixed(4)}%
             </CustomText>
           </Flex>
           <Spacer marginTop="1rem" />

@@ -14,7 +14,42 @@ export const supplyLiquidity = async (
 ) => {
   try {
     if (tokenSymbolA === BNB || tokenSymbolA === WBNB || tokenSymbolB === BNB || tokenSymbolB === WBNB) {
+      /* If Native token is involved in supplying the liquidity */
       // addLiquidityETH
+
+      let amountOut
+      let token
+      let amountTokenDesired
+      let amountTokenMin
+      let amountETHMin
+      const deadline = (Math.floor(Date.now() / 1000) + Number(trxDeadline) * 60).toString()
+      if (tokenSymbolA === BNB || tokenSymbolA === WBNB) {
+        amountOut = tokenInputA
+        amountTokenDesired = tokenInputB
+        token = tokenSymbolB
+        amountTokenMin = Number(tokenInputB) - (Number(tokenInputB) * Number(slippage)) / 100
+        amountETHMin = Number(tokenInputA) - (Number(tokenInputA) * Number(slippage)) / 100
+      } else {
+        amountOut = tokenInputB
+        amountTokenDesired = tokenInputB
+        token = tokenSymbolA
+        amountTokenMin = Number(tokenInputA) - (Number(tokenInputA) * Number(slippage)) / 100
+        amountETHMin = Number(tokenInputB) - (Number(tokenInputB) * Number(slippage)) / 100
+      }
+
+      console.log(token)
+
+      const trx = await addLiquidityETH(
+        toWei(amountOut),
+        BSC_TESTNET_ADDRESS[token],
+        toWei(amountTokenDesired),
+        toWei(amountTokenMin),
+        toWei(amountETHMin),
+        userAddress,
+        deadline
+      )
+
+      return trx
     } else {
       // addLiquidity
       const minReceivedA = Number(tokenInputA) - (Number(tokenInputA) * Number(slippage)) / 100
@@ -73,7 +108,7 @@ const addLiquidityETH = async (
   try {
     const instance = getContract(ROUTER, ROUTER)
     const trx = await instance.methods
-      .addLiquidity(token, amountTokenDesired, amountTokenMin, amountTokenMin, amountETHMin, to, deadline)
+      .addLiquidityETH(token, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline)
       .send({
         from: to,
         value: amountOut,

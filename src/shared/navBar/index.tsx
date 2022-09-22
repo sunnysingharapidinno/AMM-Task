@@ -39,7 +39,7 @@ const NavBar = () => {
   const dispatch = useDispatch<AppDispatch>()
 
   return (
-    <NavBarContainerStyled>
+    <NavBarContainerStyled walletConnected={Boolean(account)}>
       <div className="grid-item">
         <img onClick={() => navigate(rootPath)} src={rapidInnovationLogoURL} alt="Rapid Innovation" className="logo" />
       </div>

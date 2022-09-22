@@ -2,7 +2,11 @@ import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 import { SIZES } from '../../styles/theme'
 
-export const NavBarContainerStyled = styled.div`
+interface I_NavBarContainerStyled {
+  walletConnected?: boolean
+}
+
+export const NavBarContainerStyled = styled.div<I_NavBarContainerStyled>`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   padding: 0rem 1rem;
@@ -26,15 +30,19 @@ export const NavBarContainerStyled = styled.div`
   }
 
   @media (max-width: 700px) {
-    grid-template-columns: repeat(2, 1fr);
+    padding: 1rem 0rem;
+    grid-template-columns: 1fr;
+    .grid-item:first-child {
+      justify-content: center;
+    }
     .grid-item:nth-child(2) {
-      justify-content: end;
+      justify-content: center;
     }
     .grid-item:last-child {
-      grid-column: span 2;
+      /* grid-column: span 2; */
       width: 100%;
       display: flex;
-      justify-content: space-between;
+      justify-content: ${(props) => (props.walletConnected ? 'space-between' : 'center')};
     }
   }
 `

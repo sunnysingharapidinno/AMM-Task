@@ -1,7 +1,7 @@
 export const ROUTER = 'ROUTER'
 export const BUST = 'BUST'
 export const BUSD = 'BUSD'
-export const REST = 'REST'
+export const RST = 'RST'
 export const BNB = 'BNB'
 export const WBNB = 'WBNB'
 export const ERC20 = 'ERC20'

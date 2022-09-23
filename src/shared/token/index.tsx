@@ -6,13 +6,14 @@ interface TokenProps {
   label?: string
   labelColor?: string
   size?: string
+  className?: string
 }
 
 const Token = (props: TokenProps) => {
-  const { token = 'unknown', label, labelColor, size } = props
+  const { token = 'unknown', label, labelColor, size, className } = props
 
   return (
-    <TokenWrapper labelColor={labelColor} size={size}>
+    <TokenWrapper className={className} labelColor={labelColor} size={size}>
       <img src={require(`../../assets/tokens/${token?.toLowerCase()}.png`)} alt={token} />
       {label ? (
         <Spacer marginLeft="0.5rem">

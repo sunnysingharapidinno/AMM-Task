@@ -1,7 +1,15 @@
-import { FACTORY, AMMLP, ROUTER, ZEROADDRESS, BNB, WBNB } from '../../constants'
+import { AMMLP, ROUTER, ZEROADDRESS, BNB, WBNB } from '../../constants'
 import { BSC_TESTNET_ADDRESS } from '../../constants/bsc-testnet/contract'
 import { getContract } from '../contract'
-import { getReserves, getToken0, getTotalSupply } from '../shared'
+import {
+  getAllPairsLength,
+  getBalance,
+  getPairAddresByTokenAddress,
+  getPairAddressById,
+  getReserves,
+  getToken0,
+  getTotalSupply,
+} from '../shared'
 import { toEther, toWei } from '../utility'
 
 export const getQuotePrice = async (
@@ -13,7 +21,7 @@ export const getQuotePrice = async (
   try {
     const token0 = tokenA === BNB ? WBNB : tokenA
     const token1 = tokenB === BNB ? WBNB : tokenB
-    const pairAddress = await getPairAddress(BSC_TESTNET_ADDRESS[token0], BSC_TESTNET_ADDRESS[token1])
+    const pairAddress = await getPairAddresByTokenAddress(BSC_TESTNET_ADDRESS[token0], BSC_TESTNET_ADDRESS[token1])
 
     if (pairAddress === BSC_TESTNET_ADDRESS[ZEROADDRESS]) {
       return '0'
@@ -33,18 +41,6 @@ export const getQuotePrice = async (
   }
 }
 
-export const getPairAddress = async (token0Address: string, token1Address: string): Promise<string> => {
-  try {
-    const instance = getContract(FACTORY, FACTORY)
-    const address = await instance.methods.getPair(token0Address, token1Address).call()
-
-    return address
-  } catch (error) {
-    console.log(error)
-    throw error
-  }
-}
-
 export const getPoolShare = async (
   tokenA: string,
   tokenB: string,
@@ -54,14 +50,14 @@ export const getPoolShare = async (
   try {
     const token0 = tokenA === BNB ? WBNB : tokenA
     const token1 = tokenB === BNB ? WBNB : tokenB
-    const pairAddress = await getPairAddress(BSC_TESTNET_ADDRESS[token0], BSC_TESTNET_ADDRESS[token1])
+    const pairAddress = await getPairAddresByTokenAddress(BSC_TESTNET_ADDRESS[token0], BSC_TESTNET_ADDRESS[token1])
 
     if (pairAddress === BSC_TESTNET_ADDRESS[ZEROADDRESS]) {
       return '0'
     }
 
     const totalSupply = await getTotalSupply(AMMLP, pairAddress)
-    console.log(pairAddress)
+
     const liquidity = await getLiquidity(tokenA, tokenB, amount0, amount1, pairAddress)
 
     const share = Number(liquidity) / (Number(toEther(totalSupply)) + Number(liquidity))
@@ -88,7 +84,7 @@ export const getLiquidity = async (
     if (pairAddress) {
       _pairAddress = pairAddress
     } else {
-      const pairAddress = await getPairAddress(BSC_TESTNET_ADDRESS[token0], BSC_TESTNET_ADDRESS[token1])
+      const pairAddress = await getPairAddresByTokenAddress(BSC_TESTNET_ADDRESS[token0], BSC_TESTNET_ADDRESS[token1])
 
       if (pairAddress === BSC_TESTNET_ADDRESS[ZEROADDRESS]) {
         return '0'
@@ -103,7 +99,7 @@ export const getLiquidity = async (
     let reserve0 = '0'
     let reserve1 = '0'
 
-    const token0Address = await getToken0(AMMLP, _pairAddress)
+    const token0Address = await getToken0(_pairAddress)
 
     if (BSC_TESTNET_ADDRESS[token0] === token0Address) {
       reserve0 = reserves[0]
@@ -118,6 +114,25 @@ export const getLiquidity = async (
 
     const liquidity = toEther(Math.min(tokenALiquidity, tokenBLiquidity))
     return liquidity
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getUserLpPairs = async (userAddress: string): Promise<string[]> => {
+  try {
+    const allPairLength = await getAllPairsLength()
+    const pairAddressArray = []
+
+    for (let i = 0; i < allPairLength; i++) {
+      const address = await getPairAddressById(i)
+      const lpBalance = await getBalance(address, userAddress)
+      if (Number(toEther(lpBalance)) > 0) {
+        pairAddressArray.push(address)
+      }
+    }
+
+    return pairAddressArray
   } catch (error) {
     throw error
   }

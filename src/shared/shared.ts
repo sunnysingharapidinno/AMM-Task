@@ -134,3 +134,29 @@ export const Flex = styled.div<FlexInterface>`
   justify-content: ${(props) => (props.justifyContent ? props.justifyContent : 'center')};
   align-items: ${(props) => (props.alignItems ? props.alignItems : 'center')};
 `
+const rotate360 = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`
+
+interface I_LoadingSpinner {
+  size?: string
+}
+
+export const LoadingSpinner = styled.div<I_LoadingSpinner>`
+  animation: ${rotate360} 0.5s linear infinite;
+  transform: translateZ(0);
+
+  border-top: 2px solid #b3c3e5;
+  border-right: 2px solid #b3c3e5;
+  border-bottom: 2px solid #b3c3e5;
+  border-left: 4px solid #182747;
+  background: transparent;
+  width: ${(props) => props.size || '3rem'};
+  height: ${(props) => props.size || '3rem'};
+  border-radius: 50%;
+`

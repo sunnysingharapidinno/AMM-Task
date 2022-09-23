@@ -13,9 +13,8 @@ export const BalanceContainer = styled.div<BalanceContainerInterface>`
   position: absolute;
   top: -24px;
   right: 0px;
-
-  transition: transform 0.5s;
-  transform: ${(props) => (props.showBalance ? `translateY(0px)` : `translateY(30px)`)};
+  transition: transform 0.7s;
+  transform: ${(props) => (props.showBalance ? `translateY(0px) scale(1)` : `translateY(30px) scale(0)`)};
   z-index: -1;
 `
 

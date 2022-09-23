@@ -7,7 +7,7 @@ import { Card, Center, CustomText, Flex, RotateContainer, Spacer, TextBox } from
 import { InputContainer, TransactionSettingsContainer } from './style'
 import { AiOutlineSetting } from 'react-icons/ai'
 import { checkApproval, getBalance } from '../../logic/shared'
-import { BNB, BUST, REST, WBNB } from '../../constants'
+import { BNB, BUST, RST, WBNB } from '../../constants'
 import { getAmountsOut, getMinReceived } from '../../logic/swap'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../redux/store'
@@ -15,7 +15,7 @@ import { approveToken } from '../../logic/shared/transactions'
 import Modal from '../../shared/modal'
 import { swap, SwapMethods } from '../../logic/swap/transaction'
 
-export const tokensList = [BNB, REST, BUST]
+export const tokensList = [BNB, RST, BUST]
 const SwapPage: React.FC = () => {
   const [input0, setInput0] = useState<string | number>('')
   const [input1, setInput1] = useState<string | number>('')

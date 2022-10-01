@@ -18,10 +18,22 @@ interface AMMInputInterface {
   selctedToken?: string
   balance?: string | number
   placeholder?: string
+  disableSelectTokenButton?: boolean
 }
 
 const AmmInput = (props: AMMInputInterface) => {
-  const { onMaxClick, value, onChange, className, onTokenChange, tokenList, selctedToken, balance, placeholder } = props
+  const {
+    onMaxClick,
+    value,
+    onChange,
+    className,
+    onTokenChange,
+    tokenList,
+    selctedToken,
+    balance,
+    placeholder,
+    disableSelectTokenButton,
+  } = props
   const { account } = useSelector((state: RootState) => state.wallet)
   const [showModal, setShowModal] = useState(false)
 
@@ -46,7 +58,13 @@ const AmmInput = (props: AMMInputInterface) => {
       </BalanceContainer>
 
       <Button onClick={onMaxClick}>Max</Button>
-      <Button onClick={() => setShowModal(!showModal)}> {selctedToken ? selctedToken : `Select Token`} </Button>
+      <Button
+        style={{ whiteSpace: 'nowrap' }}
+        disabled={disableSelectTokenButton}
+        onClick={() => setShowModal(!showModal)}
+      >
+        {selctedToken ? selctedToken : `Select Token`}
+      </Button>
 
       <Modal
         show={showModal}

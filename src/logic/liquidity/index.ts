@@ -109,8 +109,8 @@ export const getLiquidity = async (
       reserve1 = reserves[0]
     }
 
-    const tokenALiquidity = (Number(toWei(amount0)) * totalSupply) / Number(reserve0)
-    const tokenBLiquidity = (Number(toWei(amount1)) * totalSupply) / Number(reserve1)
+    const tokenALiquidity = (Number(toWei(amount0)) * Number(totalSupply)) / Number(reserve0)
+    const tokenBLiquidity = (Number(toWei(amount1)) * Number(totalSupply)) / Number(reserve1)
 
     const liquidity = toEther(Math.min(tokenALiquidity, tokenBLiquidity))
     return liquidity

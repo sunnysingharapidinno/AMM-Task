@@ -3,7 +3,7 @@ import { TokenWrapper } from './style'
 
 interface TokenProps {
   token?: string
-  label?: string
+  label?: string | boolean
   labelColor?: string
   size?: string
   className?: string
@@ -18,7 +18,7 @@ const Token = (props: TokenProps) => {
       {label ? (
         <Spacer marginLeft="0.5rem">
           <CustomText variants="normal" color={props.labelColor}>
-            {label}
+            {typeof label === 'boolean' ? token : label}
           </CustomText>
         </Spacer>
       ) : null}

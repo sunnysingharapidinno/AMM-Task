@@ -1,11 +1,17 @@
 import { Route, Routes } from 'react-router-dom'
-
-import { liquidityPath, removeLiquidityPath, rootPath } from '../../../logic/paths'
+import {
+  liquidityListPath,
+  liquidityPath,
+  liquidityPathWithParams,
+  removeLiquidityWithLpAddressPath,
+  rootPath,
+} from '../../../logic/paths'
 import PageContianer from '../../../shared/pageContainer'
 import AddLiquidityPage from '../../addLiquidity'
 import PageNotFound from '../../pageNotFound'
 import RemoveLiquidityPage from '../../removeLiquidity'
 import SwapPage from '../../swap'
+import LiquidityListPage from '../../removeLiquidity/LiquidityListPage'
 
 const notFoundRoute: RouteDefinition = {
   path: '*',
@@ -20,21 +26,30 @@ export const routes: RouteDefinition[] = [
     element: SwapPage,
     protected: false,
     title: 'Swap',
-    pathType: 0,
   },
   {
     path: liquidityPath,
     element: AddLiquidityPage,
     protected: false,
-    title: 'Remove Liquidity',
-    pathType: 0,
+    title: 'Add Liquidity',
   },
   {
-    path: removeLiquidityPath,
+    path: liquidityPathWithParams,
+    element: AddLiquidityPage,
+    protected: false,
+    title: 'Liquidity List',
+  },
+  {
+    path: liquidityListPath,
+    element: LiquidityListPage,
+    protected: false,
+    title: 'Remove Liquidity',
+  },
+  {
+    path: removeLiquidityWithLpAddressPath,
     element: RemoveLiquidityPage,
     protected: false,
     title: 'Remove Liquidity',
-    pathType: 0,
   },
 ]
   .map((r) => ({ ...r, element: r.element }))
@@ -49,6 +64,7 @@ export interface RouteDefinition {
   title?: string
   requires?: any
   pathType?: number
+  exact?: boolean
 }
 
 const getRouteRenderWithAuth = (route: RouteDefinition) => {

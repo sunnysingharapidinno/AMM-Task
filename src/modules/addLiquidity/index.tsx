@@ -2,14 +2,16 @@ import { useEffect, useState } from 'react'
 import { AiOutlineSetting } from 'react-icons/ai'
 import { IoMdAdd } from 'react-icons/io'
 import { useSelector } from 'react-redux'
+import { useLocation, useParams } from 'react-router-dom'
 import { BNB, WBNB } from '../../constants'
 import { getLiquidity, getPoolShare, getQuotePrice } from '../../logic/liquidity'
 import { supplyLiquidity } from '../../logic/liquidity/transaction'
-import { checkApproval, getBalance } from '../../logic/shared'
+import { checkApproval, getBalance, getTokenNameFromAddress } from '../../logic/shared'
 import { approveToken } from '../../logic/shared/transactions'
 import { RootState } from '../../redux/store'
 import AmmInput from '../../shared/ammInput'
 import Button from '../../shared/button'
+import CurrentPositionCard from '../../shared/currentPositionCard'
 import Expander from '../../shared/expander'
 import Modal from '../../shared/modal'
 import { Card, Center, CustomText, Flex, RotateContainer, Spacer, TextBox } from '../../shared/shared'
@@ -17,6 +19,15 @@ import { tokensList } from '../swap'
 import { TransactionSettingsContainer } from '../swap/style'
 
 type Props = {}
+
+interface I_liquidityData {
+  pairBalance: number | string
+  token0: string
+  token1: string
+  token0Balance: number | string
+  token1Balance: number | string
+  poolShare: number | string
+}
 
 const AddLiquidityPage = (props: Props) => {
   const [input0, setInput0] = useState<string | number>('')
@@ -35,10 +46,14 @@ const AddLiquidityPage = (props: Props) => {
   const [approvingToken1, setApprovingToken1] = useState(false)
   const [minReceived, setMinReceived] = useState<number | string>(0)
   const [poolShare, setPoolShare] = useState<number | string>(0)
+  const [currentLiquidityData, setCurrentLiquidityData] = useState<I_liquidityData | null>()
 
   const [notifyMessage, setNotifyMessage] = useState<{ name: string; message: string; autoClose: boolean } | null>(null)
 
   const { account } = useSelector((state: RootState) => state.wallet)
+
+  const params = useParams()
+  const state = useLocation().state as I_liquidityData
 
   const _handleInput0OnChange = async (value: string | number) => {
     setInput0(value)
@@ -234,6 +249,30 @@ const AddLiquidityPage = (props: Props) => {
     }
   }
 
+  const _fetchTokenSymbolFromParams = async (token0Address: string, token1Address: string) => {
+    try {
+      const token0 = await getTokenNameFromAddress(token0Address)
+      const token1 = await getTokenNameFromAddress(token1Address)
+
+      setToken0(token0)
+      setToken1(token1)
+      console.log(state)
+
+      if (state) {
+        setCurrentLiquidityData({
+          pairBalance: state.pairBalance,
+          poolShare: state.poolShare,
+          token0: state.token0,
+          token0Balance: state.token0Balance,
+          token1: state.token1,
+          token1Balance: state.token1Balance,
+        })
+      }
+    } catch (error) {
+      throw error
+    }
+  }
+
   useEffect(() => {
     _getTokenPerToken()
   }, [token0, token1])
@@ -244,6 +283,14 @@ const AddLiquidityPage = (props: Props) => {
       _getBalance()
     }
   }, [account, token0, token1, notifyMessage])
+
+  useEffect(() => {
+    if (Object.keys(params).length > 1) {
+      if (params.token0 && params.token1) {
+        _fetchTokenSymbolFromParams(String(params.token0), String(params.token1))
+      }
+    }
+  }, [params, state])
 
   return (
     <Center>
@@ -379,6 +426,14 @@ const AddLiquidityPage = (props: Props) => {
           )}
         </Center>
       </Card>
+
+      {currentLiquidityData && (
+        <>
+          <Spacer marginTop="2rem" />
+          <CurrentPositionCard {...currentLiquidityData} />
+          <Spacer marginTop="2rem" />
+        </>
+      )}
 
       <Modal
         show={!!notifyMessage}

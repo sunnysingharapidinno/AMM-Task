@@ -1,11 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { liquidityPath, removeLiquidityPath, rootPath } from '../../logic/paths'
+import { liquidityListPath, liquidityPath, removeLiquidityPath, rootPath } from '../../logic/paths'
 import { loginReducer, logoutReducer } from '../../redux/action/walletAction'
 import { AppDispatch, RootState } from '../../redux/store'
 import Button from '../button'
-import { CustomText, Spacer } from '../shared'
-import ThemeToggle from '../themeToggle'
+import { Spacer } from '../shared'
 import { NavBarContainerStyled, NavItem } from './style'
 
 interface NavigationInterface {
@@ -23,8 +22,8 @@ const navigations: NavigationInterface[] = [
     path: liquidityPath,
   },
   {
-    name: 'Remove Liquidity',
-    path: removeLiquidityPath,
+    name: 'My Liquidity',
+    path: liquidityListPath,
   },
 ]
 

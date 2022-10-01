@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { AMMLP } from '../../constants'
+import { liquidityPath } from '../../logic/paths'
 import { getBalance, getLpPairDetails, getTotalSupply, I_GetLpPairDetails } from '../../logic/shared'
 import { toEther } from '../../logic/utility'
 import { RootState } from '../../redux/store'
 import Button from '../button'
 import Expander from '../expander'
 import Pair from '../pair'
-import { Card, CustomText, Flex, LoadingSpinner, Spacer } from '../shared'
+import { CustomText, Flex, LoadingSpinner, Spacer } from '../shared'
 import Token from '../token'
 
 interface I_LiquidityPairInfo {
-  //   pairData: I_GetLpPairDetails
-
   pairAddress: string
 }
 
@@ -24,6 +24,8 @@ const LiquidityPairInfo = (props: I_LiquidityPairInfo) => {
   const [poolShare, setPoolShare] = useState<string | number>(0)
   const [token0Balance, setToken0Balance] = useState<string | number>(0)
   const [token1Balance, setToken1Balance] = useState<string | number>(0)
+  const [removeLiquidityModal, setRemoveLiquidity] = useState<boolean>(false)
+  const navigate = useNavigate()
 
   const { account } = useSelector((state: RootState) => state.wallet)
 
@@ -104,7 +106,7 @@ const LiquidityPairInfo = (props: I_LiquidityPairInfo) => {
 
   if (data) {
     return (
-      <Expander header={() => <Pair token0={data.token0Symbol} token1={data.token1Symbol} label />}>
+      <Expander open header={() => <Pair token0={data.token0Symbol} token1={data.token1Symbol} label />}>
         <Flex justifyContent="space-between">
           <CustomText size={'1rem'}>Pooled {data.token0Symbol}:</CustomText>
           <CustomText size={'1rem'}>
@@ -138,8 +140,43 @@ const LiquidityPairInfo = (props: I_LiquidityPairInfo) => {
         </Flex>
         <Spacer marginTop="2rem" />
         <Flex justifyContent="space-evenly">
-          <Button>Add</Button>
-          <Button>Remove</Button>
+          <Button
+            onClick={() =>
+              navigate(`${liquidityPath}/${data.token0Address}/${data.token1Address}`, {
+                state: {
+                  pairBalance: balance,
+                  poolShare: poolShare,
+                  token0: data.token0Symbol,
+                  token0Address: data.token0Address,
+                  token0Balance: token0Balance,
+                  token1: data.token1Symbol,
+                  token1Address: data.token1Address,
+                  token1Balance: token1Balance,
+                },
+              })
+            }
+          >
+            Add
+          </Button>
+          <Button
+            onClick={() =>
+              navigate(`/remove/${pairAddress}`, {
+                state: {
+                  pairBalance: balance,
+                  poolShare: poolShare,
+                  token0: data.token0Symbol,
+                  token0Address: data.token0Address,
+                  token0Balance: token0Balance,
+                  token1: data.token1Symbol,
+                  token1Address: data.token1Address,
+                  token1Balance: token1Balance,
+                },
+              })
+            }
+            /* onClick={() => setRemoveLiquidity(true)} */
+          >
+            Remove
+          </Button>
         </Flex>
       </Expander>
     )

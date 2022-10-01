@@ -25,11 +25,13 @@ export const Spacer = styled.div<Partial<SpacerProps>>`
   padding-top: ${(props) => props.paddingTop};
   padding-bottom: ${(props) => props.paddingBottom};
 `
+
 export const Card = styled.div`
   padding: 1rem;
   border-radius: 0.6rem;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   max-width: 512px;
+  min-width: 420px;
   width: 100%;
 `
 
@@ -159,4 +161,27 @@ export const LoadingSpinner = styled.div<I_LoadingSpinner>`
   width: ${(props) => props.size || '3rem'};
   height: ${(props) => props.size || '3rem'};
   border-radius: 50%;
+`
+
+interface GridProps {
+  gridContentMinWidth: string
+  marginTop: string
+  width: string
+  gap: string
+}
+
+export const GridContainer = styled.div<Partial<GridProps>>`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(${(props) => props.gridContentMinWidth || '200px'}, 1fr));
+  margin-top: ${(props) => props.marginTop};
+  gap: ${(props) => props.gap || '1.5rem'};
+  width: ${(props) => props.width};
+`
+
+interface I_Slider {
+  range?: number[]
+}
+
+export const Slider = styled.input.attrs({ type: 'range' })<I_Slider>`
+  width: 100%;
 `

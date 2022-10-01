@@ -74,6 +74,7 @@ export const getToken0 = async (address: string) => {
     throw error
   }
 }
+
 export const getToken1 = async (address: string) => {
   try {
     const instance = getContractByAddress(AMMLP, address)
@@ -165,6 +166,30 @@ export const getLpPairDetails = async (pairAddress: string): Promise<I_GetLpPair
       token1Address: token1,
       pairAddress: pairAddress,
     }
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getTokenNameFromAddress = async (tokenAddress: string): Promise<string> => {
+  try {
+    let tokenName = ''
+    Object.keys(BSC_TESTNET_ADDRESS).forEach((key: string) => {
+      if (BSC_TESTNET_ADDRESS[key] === tokenAddress) {
+        tokenName = key
+      }
+    })
+
+    if (!tokenName) {
+      const token = await getTokenData(tokenAddress)
+      tokenName = token.symbol
+    }
+
+    if (!tokenName) {
+      throw new Error('Token not found')
+    }
+
+    return tokenName
   } catch (error) {
     throw error
   }

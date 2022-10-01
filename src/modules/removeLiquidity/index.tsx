@@ -1,76 +1,111 @@
 import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { getUserLpPairs } from '../../logic/liquidity'
-import { loginReducer } from '../../redux/action/walletAction'
-import { AppDispatch, RootState } from '../../redux/store'
+import { useSelector } from 'react-redux'
+import { useLocation, useParams } from 'react-router-dom'
+import { AMMLP } from '../../constants'
+import { getBalance, getLpPairDetails, getTotalSupply } from '../../logic/shared'
+import { toEther } from '../../logic/utility'
+import { RootState } from '../../redux/store'
 import Button from '../../shared/button'
-import LiquidityPairInfo from '../../shared/liquidityPairInfo'
-import { Card, Center, CustomText, Flex, LoadingSpinner, Spacer } from '../../shared/shared'
+import CurrentPositionCard from '../../shared/currentPositionCard'
+import { Center, CustomText, Spacer } from '../../shared/shared'
+import RemoveLiquidityDetailedView from './Components/RemoveLiquidityDetailedView'
+import RemoveLiquiditySimpleView from './Components/RemoveLiquiditySimpleView'
+
+export interface I_liquidityData {
+  pairBalance: number | string
+  token0: string
+  token1: string
+  token0Address?: string
+  token1Address?: string
+  token0Balance: number | string
+  token1Balance: number | string
+  poolShare: number | string
+}
 
 const RemoveLiquidityPage: React.FC = () => {
-  const [loading, setLoading] = useState(false)
-  const [userLpAddress, setUserLpAddress] = useState<string[]>([])
+  const [currentLiquidityData, setCurrentLiquidityData] = useState<I_liquidityData | null>()
+  const [noPairFound, setNoPairFound] = useState<boolean>(false)
+  const [removeLiquidityDetailedView, setRemoveLiquidityDetailedView] = useState<boolean>(false)
 
   const { account } = useSelector((state: RootState) => state.wallet)
-  const dispatch = useDispatch<AppDispatch>()
 
-  const _getUserLpPairAddress = async (account: string) => {
+  const { lpaddress } = useParams()
+  const state = useLocation().state as I_liquidityData
+
+  useEffect(() => {
+    if (account) {
+      _getDataFromLpAddress()
+    }
+  }, [lpaddress, state, account])
+
+  const _getDataFromLpAddress = async () => {
     try {
-      setLoading(true)
-      const address = await getUserLpPairs(account)
-      setUserLpAddress(address)
-      setLoading(false)
+      setNoPairFound(false)
+      if (account) {
+        if (state && Object.keys(state).length > 0) {
+          setCurrentLiquidityData(state)
+        } else if (lpaddress) {
+          const { token0Address, token0Symbol, token1Address, token1Symbol } = await getLpPairDetails(lpaddress)
+
+          const totalSupply = await getTotalSupply(AMMLP, lpaddress)
+          const balance = await getBalance(lpaddress, account)
+          const token0Balance = await getBalance(token0Address, lpaddress)
+          const token1Balance = await getBalance(token1Address, lpaddress)
+
+          const poolToken0Balance = (Number(balance) * Number(token0Balance)) / Number(toEther(totalSupply))
+          const poolToken1Balance = (Number(balance) * Number(token1Balance)) / Number(toEther(totalSupply))
+          const share = (Number(balance) / Number(toEther(totalSupply))) * 100
+
+          setCurrentLiquidityData({
+            pairBalance: balance,
+            poolShare: share,
+            token0: token0Symbol,
+            token0Address: token0Address,
+            token0Balance: poolToken0Balance,
+            token1: token1Symbol,
+            token1Address: token1Address,
+            token1Balance: poolToken1Balance,
+          })
+        }
+      }
     } catch (error) {
-      setLoading(false)
+      setNoPairFound(true)
       throw error
     }
   }
 
-  useEffect(() => {
-    if (account) {
-      _getUserLpPairAddress(account)
-    }
-  }, [account])
+  return (
+    <Center>
+      <Spacer marginTop="3rem" />
+      <CustomText variants="h4" weight="700">
+        Remove Liquidity
+      </CustomText>
 
-  if (account) {
-    return (
-      <Center>
-        <Spacer marginTop="3rem" />
+      {noPairFound && (
+        <CustomText variants="h5" weight="700">
+          LP Pair not found
+        </CustomText>
+      )}
 
-        <Card>
-          {loading ? (
-            <Flex>
-              <LoadingSpinner size="2rem" />
-              <Spacer marginLeft="1rem" />
-              <CustomText size={'1.5rem'}>Loading user pools</CustomText>
-            </Flex>
-          ) : (
-            <>
-              {userLpAddress.map((item, index) => (
-                <Spacer paddingBottom="2rem" key={index}>
-                  <LiquidityPairInfo pairAddress={item} />
-                </Spacer>
-              ))}
-            </>
-          )}
-        </Card>
-      </Center>
-    )
-  } else {
-    return (
-      <Center>
-        <Spacer marginTop="3rem" />
-        <Card>
-          <Flex flexDirection="column">
-            <CustomText size={'1.5rem'}>Please Connect with a wallet</CustomText>
-            <Spacer marginTop="1.5rem" />
-            <Button onClick={() => dispatch(loginReducer())}>Connect Wallet</Button>
-            <Spacer marginTop="1.5rem" />
-          </Flex>
-        </Card>
-      </Center>
-    )
-  }
+      <Spacer margin="1rem 0rem">
+        <Button onClick={() => setRemoveLiquidityDetailedView(!removeLiquidityDetailedView)}>
+          {!removeLiquidityDetailedView ? 'Detailed View' : 'Simple View'}
+        </Button>
+      </Spacer>
+
+      {currentLiquidityData && (
+        <>
+          {removeLiquidityDetailedView
+            ? lpaddress && <RemoveLiquidityDetailedView lpAddress={lpaddress} />
+            : lpaddress && <RemoveLiquiditySimpleView lpAddress={lpaddress} />}
+
+          <Spacer marginTop="2rem" />
+          <CurrentPositionCard {...currentLiquidityData} />
+          <Spacer marginTop="2rem" />
+        </>
+      )}
+    </Center>
+  )
 }
 
 export default RemoveLiquidityPage

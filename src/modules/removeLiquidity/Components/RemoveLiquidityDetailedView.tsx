@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import { RSV } from 'eth-permit/dist/rpc'
+import { useEffect, useState } from 'react'
 import { AiOutlineArrowDown } from 'react-icons/ai'
 import { useSelector } from 'react-redux'
-import { I_liquidityData } from '..'
-import { AMMLP } from '../../../constants'
+import { AMMLP, ROUTER } from '../../../constants'
+import { BSC_TESTNET_ADDRESS } from '../../../constants/bsc-testnet/contract'
+import { removeLiquidity } from '../../../logic/liquidity/transaction'
 import { getBalance, getLpPairDetails, getTotalSupply } from '../../../logic/shared'
-import { toEther } from '../../../logic/utility'
+import { ERC2612PermitMessage, getPermit } from '../../../logic/shared/transactions'
+import { toEther, toWei } from '../../../logic/utility'
 import { RootState } from '../../../redux/store'
 import AmmInput from '../../../shared/ammInput'
 import Button from '../../../shared/button'
@@ -31,6 +34,7 @@ const RemoveLiquidityDetailedView = (props: I_RemoveLiquiditySimpleView) => {
   const [token0Input, setToken0Input] = useState<string | number>('')
   const [token1Input, setToken1Input] = useState<string | number>('')
   const [percentage, setPercentage] = useState<number>(0)
+  const [permit, setPermit] = useState<(ERC2612PermitMessage & RSV) | null>(null)
 
   useEffect(() => {
     if (account && lpAddress) {
@@ -117,6 +121,35 @@ const RemoveLiquidityDetailedView = (props: I_RemoveLiquiditySimpleView) => {
     await _handleToken1Input(token1Balance)
   }
 
+  const _handleApprove = async () => {
+    try {
+      if (account && lpAddress && lpInput) {
+        const permit = await getPermit(lpAddress, account, BSC_TESTNET_ADDRESS[ROUTER], String(lpInput))
+        setPermit(permit)
+      }
+    } catch (error) {
+      setPermit(null)
+      throw error
+    }
+  }
+
+  const _handleRemoveLiquidity = async () => {
+    try {
+      if (permit && token0 && token1 && account) {
+        const trx = await removeLiquidity({
+          liquidityAmount: toWei(lpInput),
+          token0Address: BSC_TESTNET_ADDRESS[token0],
+          token1Address: BSC_TESTNET_ADDRESS[token1],
+          userAddress: account,
+          permit,
+        })
+        return trx
+      }
+    } catch (error) {
+      throw error
+    }
+  }
+
   if (props) {
     return (
       <Card>
@@ -176,8 +209,12 @@ const RemoveLiquidityDetailedView = (props: I_RemoveLiquiditySimpleView) => {
         />
         <Spacer marginTop="1.5rem" marginBottom="1rem">
           <Flex justifyContent="space-around">
-            <Button>Approve</Button>
-            <Button>Remove </Button>
+            <Button disabled={!!permit} onClick={_handleApprove}>
+              Approve
+            </Button>
+            <Button disabled={!!!permit} onClick={_handleRemoveLiquidity}>
+              Remove
+            </Button>
           </Flex>
         </Spacer>
       </Card>

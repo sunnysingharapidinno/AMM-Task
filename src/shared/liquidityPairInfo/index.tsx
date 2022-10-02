@@ -24,7 +24,6 @@ const LiquidityPairInfo = (props: I_LiquidityPairInfo) => {
   const [poolShare, setPoolShare] = useState<string | number>(0)
   const [token0Balance, setToken0Balance] = useState<string | number>(0)
   const [token1Balance, setToken1Balance] = useState<string | number>(0)
-  const [removeLiquidityModal, setRemoveLiquidity] = useState<boolean>(false)
   const navigate = useNavigate()
 
   const { account } = useSelector((state: RootState) => state.wallet)

@@ -7,7 +7,7 @@ import { toEther } from '../../logic/utility'
 import { RootState } from '../../redux/store'
 import Button from '../../shared/button'
 import CurrentPositionCard from '../../shared/currentPositionCard'
-import { Center, CustomText, Spacer } from '../../shared/shared'
+import { Center, CustomText, Flex, LoadingSpinner, Spacer } from '../../shared/shared'
 import RemoveLiquidityDetailedView from './Components/RemoveLiquidityDetailedView'
 import RemoveLiquiditySimpleView from './Components/RemoveLiquiditySimpleView'
 
@@ -32,6 +32,8 @@ const RemoveLiquidityPage: React.FC = () => {
   const { lpaddress } = useParams()
   const state = useLocation().state as I_liquidityData
 
+  const [loading, setLoading] = useState(false)
+
   useEffect(() => {
     if (account) {
       _getDataFromLpAddress()
@@ -41,10 +43,11 @@ const RemoveLiquidityPage: React.FC = () => {
   const _getDataFromLpAddress = async () => {
     try {
       setNoPairFound(false)
+      setLoading(true)
       if (account) {
-        if (state && Object.keys(state).length > 0) {
+        /* if (state && Object.keys(state).length > 0) {
           setCurrentLiquidityData(state)
-        } else if (lpaddress) {
+        } else */ if (lpaddress) {
           const { token0Address, token0Symbol, token1Address, token1Symbol } = await getLpPairDetails(lpaddress)
 
           const totalSupply = await getTotalSupply(AMMLP, lpaddress)
@@ -68,8 +71,10 @@ const RemoveLiquidityPage: React.FC = () => {
           })
         }
       }
+      setLoading(false)
     } catch (error) {
       setNoPairFound(true)
+      setLoading(false)
       throw error
     }
   }
@@ -87,21 +92,33 @@ const RemoveLiquidityPage: React.FC = () => {
         </CustomText>
       )}
 
-      <Spacer margin="1rem 0rem">
-        <Button onClick={() => setRemoveLiquidityDetailedView(!removeLiquidityDetailedView)}>
-          {!removeLiquidityDetailedView ? 'Detailed View' : 'Simple View'}
-        </Button>
-      </Spacer>
-
-      {currentLiquidityData && (
+      {loading ? (
+        <Center>
+          <Flex>
+            <LoadingSpinner size="2rem" />
+            <Spacer marginLeft="1rem" />
+            <CustomText size={'1.5rem'}>Loading pool data</CustomText>
+          </Flex>
+        </Center>
+      ) : (
         <>
-          {removeLiquidityDetailedView
-            ? lpaddress && <RemoveLiquidityDetailedView lpAddress={lpaddress} />
-            : lpaddress && <RemoveLiquiditySimpleView lpAddress={lpaddress} />}
+          <Spacer margin="1rem 0rem">
+            <Button onClick={() => setRemoveLiquidityDetailedView(!removeLiquidityDetailedView)}>
+              {!removeLiquidityDetailedView ? 'Detailed View' : 'Simple View'}
+            </Button>
+          </Spacer>
 
-          <Spacer marginTop="2rem" />
-          <CurrentPositionCard {...currentLiquidityData} />
-          <Spacer marginTop="2rem" />
+          {currentLiquidityData && (
+            <>
+              {removeLiquidityDetailedView
+                ? lpaddress && <RemoveLiquidityDetailedView lpAddress={lpaddress} />
+                : lpaddress && <RemoveLiquiditySimpleView lpAddress={lpaddress} />}
+
+              <Spacer marginTop="2rem" />
+              <CurrentPositionCard {...currentLiquidityData} />
+              <Spacer marginTop="2rem" />
+            </>
+          )}
         </>
       )}
     </Center>

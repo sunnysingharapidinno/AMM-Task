@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { AMMLP } from '../../../constants'
+import { AMMLP, ROUTER } from '../../../constants'
 import { getBalance, getLpPairDetails, getTotalSupply } from '../../../logic/shared'
-import { toEther } from '../../../logic/utility'
+import { toEther, toWei } from '../../../logic/utility'
 import { RootState } from '../../../redux/store'
 import Button from '../../../shared/button'
 import { Card, Center, CustomText, Flex, RotateContainer, Slider, Spacer } from '../../../shared/shared'
 import Token from '../../../shared/token'
 import { AiOutlineArrowDown } from 'react-icons/ai'
+import { BSC_TESTNET_ADDRESS } from '../../../constants/bsc-testnet/contract'
+import { RSV } from 'eth-permit/dist/rpc'
+import { ERC2612PermitMessage, getPermit } from '../../../logic/shared/transactions'
+import { removeLiquidity } from '../../../logic/liquidity/transaction'
 
 interface I_RemoveLiquiditySimpleView {
   lpAddress: string
@@ -29,6 +33,7 @@ const RemoveLiquiditySimpleView = (props: I_RemoveLiquiditySimpleView) => {
   const [changedToken0Balance, setChangedToken0Balance] = useState<number>(0)
   const [changedToken1Balance, setChangedToken1Balance] = useState<number>(0)
   const [changedBalance, setChangedBalance] = useState<number>(0)
+  const [permit, setPermit] = useState<(ERC2612PermitMessage & RSV) | null>(null)
 
   useEffect(() => {
     if (account && lpAddress) {
@@ -73,10 +78,41 @@ const RemoveLiquiditySimpleView = (props: I_RemoveLiquiditySimpleView) => {
       setChangedBalance(changedBalance)
       setChangedToken0Balance(changed0Balance)
       setChangedToken1Balance(changed1Balance)
+      setPermit(null)
     } catch (error) {
       setChangedBalance(0)
       setChangedToken0Balance(0)
       setChangedToken1Balance(0)
+      setPermit(null)
+    }
+  }
+
+  const _handleApprove = async () => {
+    try {
+      if (account && lpAddress && changedBalance) {
+        const permit = await getPermit(lpAddress, account, BSC_TESTNET_ADDRESS[ROUTER], String(changedBalance))
+        setPermit(permit)
+      }
+    } catch (error) {
+      setPermit(null)
+      throw error
+    }
+  }
+
+  const _handleRemoveLiquidity = async () => {
+    try {
+      if (permit && token0 && token1 && account) {
+        const trx = await removeLiquidity({
+          liquidityAmount: toWei(changedBalance),
+          token0Address: BSC_TESTNET_ADDRESS[token0],
+          token1Address: BSC_TESTNET_ADDRESS[token1],
+          userAddress: account,
+          permit,
+        })
+        return trx
+      }
+    } catch (error) {
+      throw error
     }
   }
 
@@ -140,8 +176,12 @@ const RemoveLiquiditySimpleView = (props: I_RemoveLiquiditySimpleView) => {
           </CustomText>
         </Spacer>
         <Flex justifyContent="space-around">
-          <Button>Approve</Button>
-          <Button>Remove </Button>
+          <Button disabled={!!permit} onClick={_handleApprove}>
+            Approve
+          </Button>
+          <Button disabled={!!!permit} onClick={_handleRemoveLiquidity}>
+            Remove
+          </Button>
         </Flex>
         <Spacer marginBottom="1rem" />
       </Card>

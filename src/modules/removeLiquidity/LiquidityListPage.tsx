@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { getUserLpPairs } from '../../logic/liquidity'
 import { loginReducer } from '../../redux/action/walletAction'
 import { AppDispatch, RootState } from '../../redux/store'
 import Button from '../../shared/button'
 import LiquidityPairInfo from '../../shared/liquidityPairInfo'
+import { liquidityPath } from '../../logic/paths'
 import { Card, Center, CustomText, Flex, GridContainer, LoadingSpinner, Spacer } from '../../shared/shared'
 
 type Props = {}
@@ -16,6 +18,7 @@ const LiquidityListPage = (props: Props) => {
   const { account } = useSelector((state: RootState) => state.wallet)
 
   const dispatch = useDispatch<AppDispatch>()
+  const navigate = useNavigate()
 
   const _getUserLpPairAddress = async (account: string) => {
     try {
@@ -49,15 +52,31 @@ const LiquidityListPage = (props: Props) => {
             </Flex>
           </Center>
         ) : (
-          <GridContainer gridContentMinWidth="420px">
-            {userLpAddress.map((item, index) => (
-              <Spacer paddingBottom="2rem" key={index}>
+          <>
+            {userLpAddress.length > 0 ? (
+              <GridContainer gridContentMinWidth="420px">
+                {userLpAddress.map((item, index) => (
+                  <Spacer paddingBottom="2rem" key={index}>
+                    <Card>
+                      <LiquidityPairInfo pairAddress={item} />
+                    </Card>
+                  </Spacer>
+                ))}
+              </GridContainer>
+            ) : (
+              <Center>
+                <Spacer marginTop="3rem" />
                 <Card>
-                  <LiquidityPairInfo pairAddress={item} />
+                  <Flex flexDirection="column">
+                    <CustomText size={'1.5rem'}>No Lp tokens found</CustomText>
+                    <Spacer marginTop="1.5rem" />
+                    <Button onClick={() => navigate(liquidityPath)}>Add Liquidity First</Button>
+                    <Spacer marginTop="1.5rem" />
+                  </Flex>
                 </Card>
-              </Spacer>
-            ))}
-          </GridContainer>
+              </Center>
+            )}
+          </>
         )}
       </>
     )

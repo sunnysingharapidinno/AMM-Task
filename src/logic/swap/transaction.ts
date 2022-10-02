@@ -1,6 +1,6 @@
 import { ROUTER, WBNB } from '../../constants'
 import { BSC_TESTNET_ADDRESS } from '../../constants/bsc-testnet/contract'
-import { getContract } from '../contract'
+import { getContract } from '../shared/contract'
 import { toWei } from '../utility'
 
 interface I_SwapMethods {
@@ -30,7 +30,7 @@ export const swap = async (args: any) => {
         const deadline = (Math.floor(Date.now() / 1000) + trxDeadline * 60).toString()
         const tokenInputAmount = toWei(input0)
 
-        const trx = await swapExactETHForTokens(amountOutMin, path, to, deadline, tokenInputAmount)
+        const trx = await _swapExactETHForTokens(amountOutMin, path, to, deadline, tokenInputAmount)
         return trx
       }
       case SwapMethods[2]: {
@@ -42,7 +42,7 @@ export const swap = async (args: any) => {
         const deadline = (Math.floor(Date.now() / 1000) + trxDeadline * 60).toString()
         const tokenInputAmount = toWei(input0)
 
-        const trx = await swapETHForExactTokens(amountOut, path, to, deadline, tokenInputAmount)
+        const trx = await _swapETHForExactTokens(amountOut, path, to, deadline, tokenInputAmount)
         return trx
       }
       case SwapMethods[3]: {
@@ -54,7 +54,7 @@ export const swap = async (args: any) => {
         const to = account
         const deadline = (Math.floor(Date.now() / 1000) + trxDeadline * 60).toString()
 
-        const trx = await swapExactTokensForETH(amountIn, amountOutMin, path, to, deadline)
+        const trx = await _swapExactTokensForETH(amountIn, amountOutMin, path, to, deadline)
         return trx
       }
       case SwapMethods[4]: {
@@ -65,7 +65,7 @@ export const swap = async (args: any) => {
         const path = [BSC_TESTNET_ADDRESS[token0], BSC_TESTNET_ADDRESS[WBNB]]
         const to = account
         const deadline = (Math.floor(Date.now() / 1000) + trxDeadline * 60).toString()
-        const trx = await swapTokensForExactETH(amountOut, amountInMax, path, to, deadline)
+        const trx = await _swapTokensForExactETH(amountOut, amountInMax, path, to, deadline)
         return trx
       }
       case SwapMethods[5]: {
@@ -76,7 +76,7 @@ export const swap = async (args: any) => {
         const path = [BSC_TESTNET_ADDRESS[token0], BSC_TESTNET_ADDRESS[token1]]
         const to = account
         const deadline = (Math.floor(Date.now() / 1000) + trxDeadline * 60).toString()
-        const trx = await swapExactTokensForTokens(amountIn, amountOutMin, path, to, deadline)
+        const trx = await _swapExactTokensForTokens(amountIn, amountOutMin, path, to, deadline)
         return trx
       }
       case SwapMethods[6]: {
@@ -90,7 +90,7 @@ export const swap = async (args: any) => {
 
         // console.log({ amountOut, amountInMax, path, to, deadline })
 
-        const trx = await swapTokensForExactTokens(amountOut, amountInMax, path, to, deadline)
+        const trx = await _swapTokensForExactTokens(amountOut, amountInMax, path, to, deadline)
         return trx
       }
       default:
@@ -101,7 +101,7 @@ export const swap = async (args: any) => {
   }
 }
 
-const swapExactETHForTokens = async (
+const _swapExactETHForTokens = async (
   amountOutMin: string,
   path: string[],
   to: string,
@@ -119,7 +119,7 @@ const swapExactETHForTokens = async (
     throw error
   }
 }
-const swapETHForExactTokens = async (
+const _swapETHForExactTokens = async (
   amountOut: string,
   path: string[],
   to: string,
@@ -137,7 +137,7 @@ const swapETHForExactTokens = async (
     throw error
   }
 }
-const swapExactTokensForETH = async (
+const _swapExactTokensForETH = async (
   amountIn: string,
   amountOutMin: string,
   path: string[],
@@ -154,7 +154,7 @@ const swapExactTokensForETH = async (
     throw error
   }
 }
-const swapTokensForExactETH = async (
+const _swapTokensForExactETH = async (
   amountOut: string,
   amountInMax: string,
   path: string[],
@@ -171,7 +171,7 @@ const swapTokensForExactETH = async (
     throw error
   }
 }
-const swapExactTokensForTokens = async (
+const _swapExactTokensForTokens = async (
   amountIn: string,
   amountOutMin: string,
   path: string[],
@@ -188,7 +188,7 @@ const swapExactTokensForTokens = async (
     throw error
   }
 }
-const swapTokensForExactTokens = async (
+const _swapTokensForExactTokens = async (
   amountOut: string,
   amountInMax: string,
   path: string[],

@@ -1,6 +1,6 @@
 import { BNB, ROUTER, WBNB } from '../../constants'
 import { BSC_TESTNET_ADDRESS } from '../../constants/bsc-testnet/contract'
-import { getContract } from '../contract'
+import { getContract } from '../shared/contract'
 import { toEther, toWei } from '../utility'
 
 export const getAmountsOut = async (tokenAmount: string | number, token0: string, token1: string): Promise<string> => {

@@ -1,7 +1,7 @@
 import { BNB, ERC20, ROUTER, FACTORY, WBNB, AMMLP } from '../../constants'
 import { BSC_TESTNET_ADDRESS } from '../../constants/bsc-testnet/contract'
-import { getContract, getContractByAddress } from '../contract'
-import { getWeb3 } from '../provider'
+import { getContract, getContractByAddress } from './contract'
+import { getWeb3 } from './provider'
 import { isAddress, isEqualTo, toEther } from '../utility'
 
 export const getBalance = async (token: string, userAddress: string): Promise<string> => {

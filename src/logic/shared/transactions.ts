@@ -1,9 +1,9 @@
 import BigNumber from 'bignumber.js'
 import { ERC20, ROUTER } from '../../constants'
 import { BSC_TESTNET_ADDRESS } from '../../constants/bsc-testnet/contract'
-import { getContract } from '../contract'
+import { getContract } from './contract'
 import { signERC2612Permit } from 'eth-permit'
-import { getWeb3 } from '../provider'
+import { getWeb3 } from './provider'
 import { toWei } from '../utility'
 import { RSV } from 'eth-permit/dist/rpc'
 

@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js'
-import { getWeb3 } from '../provider'
+import { getWeb3 } from '../shared/provider'
 
 export const toEther = (amount: string | number, decimals?: string | number) => {
   const number = new BigNumber(amount)

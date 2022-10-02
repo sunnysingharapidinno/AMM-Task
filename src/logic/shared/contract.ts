@@ -1,5 +1,5 @@
-import { BSC_TESTNET_ABI } from '../constants/bsc-testnet/abi'
-import { BSC_TESTNET_ADDRESS } from '../constants/bsc-testnet/contract'
+import { BSC_TESTNET_ABI } from '../../constants/bsc-testnet/abi'
+import { BSC_TESTNET_ADDRESS } from '../../constants/bsc-testnet/contract'
 import { getWeb3 } from './provider'
 
 export const getContract = (abi: string, contract: string) => {

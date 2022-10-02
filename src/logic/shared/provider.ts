@@ -1,5 +1,5 @@
 import Web3 from 'web3'
-import { PROIVDER } from '../constants/providerConstants'
+import { PROIVDER } from '../../constants/providerConstants'
 
 let currentProviderConfig = PROIVDER[97]
 

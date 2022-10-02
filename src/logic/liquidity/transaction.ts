@@ -1,7 +1,7 @@
 import { RSV } from 'eth-permit/dist/rpc'
 import { BNB, ROUTER, WBNB } from '../../constants'
 import { BSC_TESTNET_ADDRESS } from '../../constants/bsc-testnet/contract'
-import { getContract } from '../contract'
+import { getContract } from '../shared/contract'
 import { ERC2612PermitMessage } from '../shared/transactions'
 import { toWei } from '../utility'
 

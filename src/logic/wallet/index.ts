@@ -1,4 +1,4 @@
-import { getWeb3 } from '../provider'
+import { getWeb3 } from '../shared/provider'
 
 export const walletLogin = async () => {
   try {

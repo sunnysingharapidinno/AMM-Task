@@ -1,6 +1,6 @@
 import { AMMLP, ROUTER, ZEROADDRESS, BNB, WBNB } from '../../constants'
 import { BSC_TESTNET_ADDRESS } from '../../constants/bsc-testnet/contract'
-import { getContract } from '../contract'
+import { getContract } from '../shared/contract'
 import {
   getAllPairsLength,
   getBalance,
